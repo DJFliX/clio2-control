@@ -4,6 +4,8 @@
 #define BUTTON_PRESS_THRESHOLD 100 //Minimum voltage before we consider the button pressed
 #define COMPERATOR_INTERVAL 35
 
+#include "atm_custom/Atm_virtualbutton.cpp"
+
 Atm_bit red_cluster;
 Atm_bit black_cluster;
 Atm_bit brown_cluster;
@@ -14,6 +16,15 @@ Atm_comparator green_cmp;
 Atm_comparator blue_cmp;
 Atm_comparator yellow_cmp;
 
+Atm_virtualbutton scroll_up;
+Atm_virtualbutton scroll_down;
+Atm_virtualbutton toggle;
+Atm_virtualbutton volume_up;
+Atm_virtualbutton volume_down;
+Atm_virtualbutton volume_mute;
+Atm_virtualbutton src_right;
+Atm_virtualbutton src_left;
+
 long scroll_last_green;
 long scroll_last_blue;
 long scroll_last_yellow;
@@ -23,48 +34,54 @@ Atm_step cluster_stepper;
 
 void cmp_callback( int idx, int v, int pressed ) {
     Serial.print(pressed);
-    Serial.print(" ");
+    Serial.print(F(" "));
   // Do something when one of the thresholds is crossed
     switch(idx) {
       case GREEN:
         if(red_cluster.state()) {
-          Serial.println("BTN_TOGGLE");
+          toggle.setState(pressed);
         } else if (black_cluster.state()) {
-          Serial.println("BTN_SRC_RIGHT");
+          src_right.setState(pressed);
         } else if (brown_cluster.state()) {
           scroll_last_green = millis();
           if(pressed && millis() - scroll_last_blue < COMPERATOR_INTERVAL + 5) {
-            Serial.println("EVENT_GREEN, UP");
+            Serial.println(F("EVENT_GREEN, UP"));
+            scroll_up.press();
           } else if(pressed && millis() - scroll_last_yellow < COMPERATOR_INTERVAL + 5) {
-            Serial.println("EVENT_GREEN, DOWN");
+            Serial.println(F("EVENT_GREEN, DOWN"));
+            scroll_down.press();
           }
         }
         break;
       case BLUE:
         if(red_cluster.state()) {
-          Serial.println("BTN_VOLUME_UP");
+          volume_up.setState(pressed);
         } else if (black_cluster.state()) {
-          Serial.println("BTN_VOLUME_MUTE");
+          volume_mute.setState(pressed);
         } else if (brown_cluster.state()) {
           scroll_last_blue = millis();
           if(pressed && millis() - scroll_last_yellow < COMPERATOR_INTERVAL + 5) {
-            Serial.println("EVENT_BLUE, UP");
+            Serial.println(F("EVENT_BLUE, UP"));
+            scroll_up.press();
           } else if(pressed && millis() - scroll_last_green < COMPERATOR_INTERVAL + 5) {
-            Serial.println("EVENT_BLUE, DOWN");
+            Serial.println(F("EVENT_BLUE, DOWN"));
+            scroll_down.press();
           }
         }
         break;
       case YELLOW:
         if(red_cluster.state()) {
-          Serial.println("BTN_VOLUME_DOWN");
+          Serial.println(F("BTN_VOLUME_DOWN"));
         } else if (black_cluster.state()) {
-          Serial.println("BTN_SRC_LEFT");
+          src_left.setState(pressed);
         } else if (brown_cluster.state()) {
           scroll_last_yellow = millis();
           if(pressed && millis() - scroll_last_green < COMPERATOR_INTERVAL + 5) {
-            Serial.println("EVENT_YELLOW, UP");
+            Serial.println(F("EVENT_YELLOW, UP"));
+            scroll_up.press();
           } else if(pressed && millis() - scroll_last_blue < COMPERATOR_INTERVAL + 5) {
-            Serial.println("EVENT_YELLOW, DOWN");
+            Serial.println(F("EVENT_YELLOW, DOWN"));
+            scroll_down.press();
           }
         }
         break;
@@ -74,9 +91,9 @@ void cmp_callback( int idx, int v, int pressed ) {
 void step_callback(int idx, int new_state, int up) {
   if(new_state) {
     Serial.print(idx);
-    Serial.print(" ");
+    Serial.print(F(" "));
     Serial.print(new_state);
-    Serial.print(" ");
+    Serial.print(F(" "));
     Serial.println(up);
     switch(idx) {
       case RED:
@@ -96,6 +113,24 @@ void step_callback(int idx, int new_state, int up) {
         break;
     }
   }
+}
+
+void scroll_cb(int a, int b, int c){ 
+  Serial.print(F("Scroll: "));
+  Serial.print(a);
+  Serial.print(F(" "));
+  Serial.print(b);
+  Serial.print(F(" "));
+  Serial.println(c);
+}
+
+void butt_event_cb(int a, int b, int c){
+  Serial.print(F("Butt: "));
+  Serial.print(a);
+  Serial.print(F(" "));
+  Serial.print(b);
+  Serial.print(F(" "));
+  Serial.println(c);
 }
 
 void button_init() {
@@ -132,7 +167,31 @@ void button_init() {
   cluster_stepper.onStep(0, red_cluster, red_cluster.EVT_ON);
   cluster_stepper.onStep(1, black_cluster, black_cluster.EVT_ON);
   cluster_stepper.onStep(2, brown_cluster, brown_cluster.EVT_ON);
+
+  scroll_up.begin()
+    .onPress(scroll_cb, SCROLL_UP);
     
+  scroll_down.begin()
+    .onPress(scroll_cb, SCROLL_DOWN);
+
+  toggle.begin()
+    .onPress(butt_event_cb, BTN_TOGGLE);
+
+  volume_up.begin()
+    .onPress(butt_event_cb, BTN_VOLUME_UP);
+
+  volume_down.begin()
+    .onPress(butt_event_cb, BTN_VOLUME_DOWN);
+
+  volume_mute.begin()
+    .onPress(butt_event_cb, BTN_VOLUME_MUTE);
+
+  src_right.begin()
+    .onPress(butt_event_cb, BTN_SRC_RIGHT);
+    
+  src_left.begin()
+    .onPress(butt_event_cb, BTN_SRC_LEFT);
+ 
 }
 
 
