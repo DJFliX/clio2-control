@@ -1,282 +1,141 @@
 #include "headers/clio_pins.h"
 #include "headers/clio_events.h"
 
-#define CLUSTER_BROWN 0
-#define CLUSTER_RED 1
-#define CLUSTER_BLACK 2
-
 #define BUTTON_PRESS_THRESHOLD 100 //Minimum voltage before we consider the button pressed
+#define COMPERATOR_INTERVAL 35
 
-#define COMPARATOR_TASK_INTERVAL 20
+Atm_bit red_cluster;
+Atm_bit black_cluster;
+Atm_bit brown_cluster;
 
-int active_cluster = CLUSTER_BLACK;
+Atm_button debug_button;
 
-static uint16_t threshold_list[] = { 80 }; 
+Atm_comparator green_cmp;
+Atm_comparator blue_cmp;
+Atm_comparator yellow_cmp;
 
-Atm_comparator green_red_cmp;
-Atm_comparator blue_red_cmp;
-Atm_comparator yellow_red_cmp;
+long scroll_last_green;
+long scroll_last_blue;
+long scroll_last_yellow;
 
-Atm_comparator green_brown_cmp;
-Atm_comparator blue_brown_cmp;
-Atm_comparator yellow_brown_cmp;
-
-Atm_comparator green_black_cmp;
-Atm_comparator blue_black_cmp;
-Atm_comparator yellow_black_cmp;
+static uint16_t threshold_list[] = { 80 };
+Atm_step cluster_stepper;
 
 void cmp_callback( int idx, int v, int pressed ) {
-    print_event_name(idx);
     Serial.print(pressed);
     Serial.print(" ");
   // Do something when one of the thresholds is crossed
     switch(idx) {
-      case BTN_TOGGLE:
-        Serial.println( green_red_cmp.state() );
-        break; 
-      case BTN_VOLUME_UP:
-        Serial.println( blue_red_cmp.state() );
+      case GREEN:
+        if(red_cluster.state()) {
+          Serial.println("BTN_TOGGLE");
+        } else if (black_cluster.state()) {
+          Serial.println("BTN_SRC_RIGHT");
+        } else if (brown_cluster.state()) {
+          scroll_last_green = millis();
+          if(pressed && millis() - scroll_last_blue < COMPERATOR_INTERVAL + 5) {
+            Serial.println("EVENT_GREEN, UP");
+          } else if(pressed && millis() - scroll_last_yellow < COMPERATOR_INTERVAL + 5) {
+            Serial.println("EVENT_GREEN, DOWN");
+          }
+        }
         break;
-      case BTN_VOLUME_DOWN:
-        Serial.println( yellow_red_cmp.state() );
+      case BLUE:
+        if(red_cluster.state()) {
+          Serial.println("BTN_VOLUME_UP");
+        } else if (black_cluster.state()) {
+          Serial.println("BTN_VOLUME_MUTE");
+        } else if (brown_cluster.state()) {
+          scroll_last_blue = millis();
+          if(pressed && millis() - scroll_last_yellow < COMPERATOR_INTERVAL + 5) {
+            Serial.println("EVENT_BLUE, UP");
+          } else if(pressed && millis() - scroll_last_green < COMPERATOR_INTERVAL + 5) {
+            Serial.println("EVENT_BLUE, DOWN");
+          }
+        }
         break;
-      case BTN_SRC_RIGHT:
-        Serial.println( green_black_cmp.state() );
-        break;
-      case BTN_SRC_LEFT:
-        Serial.println( yellow_black_cmp.state() );
-        break;
-      case BTN_VOLUME_MUTE: 
-        Serial.println( blue_black_cmp.state() );
-        break;
-      case EVENT_GREEN: 
-        Serial.println( green_brown_cmp.state() );
-        break;
-      case EVENT_BLUE: 
-        Serial.println( blue_brown_cmp.state() );
-        break;
-      case EVENT_YELLOW:
-        Serial.println( yellow_brown_cmp.state() );
+      case YELLOW:
+        if(red_cluster.state()) {
+          Serial.println("BTN_VOLUME_DOWN");
+        } else if (black_cluster.state()) {
+          Serial.println("BTN_SRC_LEFT");
+        } else if (brown_cluster.state()) {
+          scroll_last_yellow = millis();
+          if(pressed && millis() - scroll_last_green < COMPERATOR_INTERVAL + 5) {
+            Serial.println("EVENT_YELLOW, UP");
+          } else if(pressed && millis() - scroll_last_blue < COMPERATOR_INTERVAL + 5) {
+            Serial.println("EVENT_YELLOW, DOWN");
+          }
+        }
         break;
   }
-
 }
 
-
+void step_callback(int idx, int new_state, int up) {
+  if(new_state) {
+    Serial.print(idx);
+    Serial.print(" ");
+    Serial.print(new_state);
+    Serial.print(" ");
+    Serial.println(up);
+    switch(idx) {
+      case RED:
+        black_cluster.off();
+        brown_cluster.off();
+        delay(5);
+        break;
+      case BROWN:
+        red_cluster.off();
+        black_cluster.off();
+        delay(5);
+        break;
+      case BLACK:
+        brown_cluster.off();
+        red_cluster.off();
+        delay(5);
+        break;
+    }
+  }
+}
 
 void button_init() {
-  pinMode(BLACK, OUTPUT);
-  pinMode(RED, OUTPUT);
-  digitalWrite(BLACK, LOW);
-  digitalWrite(RED, LOW);
-  
-  pinMode(GREEN, INPUT);
-  pinMode(YELLOW, INPUT);
-  pinMode(BLUE, INPUT);
-  
-  scrollwheel_init();
-  
-  green_red_cmp.begin(GREEN, CLUSTER_RED, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, BTN_TOGGLE);
-  blue_red_cmp.begin(BLUE, CLUSTER_RED, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, BTN_VOLUME_UP);
-  yellow_red_cmp.begin(YELLOW, CLUSTER_RED, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, BTN_VOLUME_DOWN);
+  red_cluster.begin()
+    .onChange(step_callback, RED)
+    .led(RED);
+  black_cluster.begin()
+    .onChange(step_callback, BLACK)
+    .led(BLACK);
+  brown_cluster.begin()
+    .onChange(step_callback, BROWN)
+    .led(BROWN);
 
-  green_black_cmp.begin(GREEN, CLUSTER_BLACK, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, BTN_SRC_RIGHT);
-  blue_black_cmp.begin(BLUE, CLUSTER_BLACK, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, BTN_VOLUME_MUTE);
-  yellow_black_cmp.begin(YELLOW, CLUSTER_BLACK, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, BTN_SRC_LEFT);
+  debug_button.begin(7)
+    .onPress( cluster_stepper, cluster_stepper.EVT_STEP )
+    .debounce( 10 )
+    .repeat();
+    
+  //red_cluster.trace(Serial);
 
-}
+  green_cmp.begin(GREEN, COMPERATOR_INTERVAL)
+    .threshold( threshold_list, sizeof( threshold_list ) )
+    .onChange(cmp_callback, GREEN);
 
-int lastBlackClusterState = NO_OP;
-int getBlackClusterState() {
-  digitalWrite(BLACK, HIGH);
-  delay(5);
-  int retVal = NO_OP;
-  if(analogRead(BLUE) > BUTTON_PRESS_THRESHOLD) {
-    retVal = BTN_VOLUME_MUTE;
-  } else if (analogRead(YELLOW) > BUTTON_PRESS_THRESHOLD) {
-    retVal = BTN_SRC_LEFT;
-  } else if (analogRead(GREEN) > BUTTON_PRESS_THRESHOLD) {
-    retVal = BTN_SRC_RIGHT;
-  }
-  
-  digitalWrite(BLACK, LOW);
-  return retVal;
+  blue_cmp.begin(BLUE, COMPERATOR_INTERVAL)
+    .threshold( threshold_list, sizeof( threshold_list ) )
+    .onChange(cmp_callback, BLUE);
+    
+  yellow_cmp.begin(YELLOW, COMPERATOR_INTERVAL)
+    .threshold( threshold_list, sizeof( threshold_list ) )
+    .onChange(cmp_callback, YELLOW);
+
+  cluster_stepper.begin();
+  cluster_stepper.onStep(0, red_cluster, red_cluster.EVT_ON);
+  cluster_stepper.onStep(1, black_cluster, black_cluster.EVT_ON);
+  cluster_stepper.onStep(2, brown_cluster, brown_cluster.EVT_ON);
+    
 }
 
 
-int lastRedClusterState = NO_OP;
-int getRedClusterState() {
-  digitalWrite(RED, HIGH);
-  
-  delay(5);
-  int retVal = NO_OP;
-  if(analogRead(BLUE) > BUTTON_PRESS_THRESHOLD) {
-    retVal = BTN_VOLUME_UP;
-  } else if (analogRead(YELLOW) > BUTTON_PRESS_THRESHOLD) {
-    retVal = BTN_VOLUME_DOWN;
-  } else if (analogRead(GREEN) > BUTTON_PRESS_THRESHOLD) {
-    retVal = BTN_TOGGLE;
-  }
-  
-  digitalWrite(RED, LOW);
-  return retVal;
-}
 
-#ifdef DEBUG
-
-void print_event_name(int event) {
-  switch(active_cluster) {
-    case CLUSTER_BROWN: 
-      Serial.print("BR ");
-      break;
-    case CLUSTER_RED: 
-      Serial.print("RE ");
-      break;
-    case CLUSTER_BLACK: 
-      Serial.print("BL ");
-      break;
-  }
-  switch(event) {
-    case NO_OP: 
-      Serial.println("- (release)");
-      break;
-    case SCROLL_UP:
-      Serial.println("Up");
-      break;
-    case SCROLL_DOWN:
-      Serial.println("Down");
-      break;
-    case BTN_VOLUME_DOWN:
-      Serial.println("Vol -");
-      break;
-    case BTN_VOLUME_MUTE:
-      Serial.println("Vol Mute");
-      break;
-    case BTN_VOLUME_UP:
-      Serial.println("Vol +");
-      break;
-    case BTN_SRC_LEFT:
-      Serial.println("Src Left");
-      break;
-    case BTN_SRC_RIGHT:
-      Serial.println("Src Right");
-      break;
-    case BTN_TOGGLE:
-      Serial.println("Toggle");
-      break;
-    case EVENT_GREEN: 
-      Serial.print("Green: ");
-      break;
-    case EVENT_BLUE: 
-      Serial.print("Blue: ");
-      break;
-    case EVENT_YELLOW:
-      Serial.print("Yellow: ");
-      break;
-  }
-}
-#endif
-#ifndef DEBUG 
-void print_event_name(int event) {}
-#endif
-
-int get_active_cluster_pin() {
-  switch(active_cluster) {
-    case CLUSTER_BROWN:
-      return BROWN;
-    case CLUSTER_RED:
-      return RED;
-    case CLUSTER_BLACK:
-      return BLACK;
-  }
-}
-
-void increment_active_cluster() {
-  switch(active_cluster) {
-    case CLUSTER_BLACK: 
-      active_cluster = CLUSTER_BROWN;
-      break;
-    case CLUSTER_BROWN: 
-      active_cluster = CLUSTER_RED;
-      break;
-    case CLUSTER_RED:
-      active_cluster = CLUSTER_BLACK;
-      break;
-  }
-
-  green_red_cmp.setCluster(active_cluster);
-  yellow_red_cmp.setCluster(active_cluster);
-  blue_red_cmp.setCluster(active_cluster);
-  green_black_cmp.setCluster(active_cluster);
-  yellow_black_cmp.setCluster(active_cluster);
-  blue_black_cmp.setCluster(active_cluster);
-  scrollwheel_set_active_cluster(active_cluster);
-}
-
-void button_loop() {
-  int cluster_pin = get_active_cluster_pin();
-  digitalWrite(cluster_pin, HIGH);
-  automaton.run();
-  digitalWrite(cluster_pin, LOW);
-  increment_active_cluster();
-  /*int newClusterState = getScrollState();
-  if(newClusterState != lastScrollClusterState) {
-    if((lastScrollClusterState + 1 == newClusterState) || (lastScrollClusterState == 2 && newClusterState == 0)) {
-      print_event_name(SCROLL_DOWN);
-    } else if ((lastScrollClusterState - 1 == newClusterState) || (newClusterState == 2 && lastScrollClusterState == 0)) {
-      print_event_name(SCROLL_UP);
-    }
-    lastScrollClusterState = newClusterState;
-  }
-  
-  newClusterState = getRedClusterState();
-  if(newClusterState != lastRedClusterState) {
-    print_event_name(newClusterState);
-    lastRedClusterState = newClusterState;
-  }
-
-
-  newClusterState = getBlackClusterState();
-  if(newClusterState != lastBlackClusterState) {
-    print_event_name(newClusterState);
-    lastBlackClusterState = newClusterState;
-  }*/
-  
-}
-
-void scrollwheel_init() {
-  pinMode(BROWN, OUTPUT);
-  digitalWrite(BROWN, LOW);
-  
-  green_brown_cmp.begin(GREEN, CLUSTER_BROWN, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, EVENT_GREEN);
-
-  blue_brown_cmp.begin(BLUE, CLUSTER_BROWN, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, EVENT_BLUE);
-  
-  yellow_brown_cmp.begin(YELLOW, CLUSTER_BROWN, COMPARATOR_TASK_INTERVAL)
-    .threshold( threshold_list, sizeof( threshold_list ) )
-    .onChange(cmp_callback, EVENT_YELLOW);
-}
-
-void scrollwheel_set_active_cluster(int cluster) {
-  green_brown_cmp.setCluster(cluster);
-  blue_brown_cmp.setCluster(cluster);
-  yellow_brown_cmp.setCluster(cluster);
-}
 
 

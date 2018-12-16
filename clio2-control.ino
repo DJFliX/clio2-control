@@ -1,4 +1,3 @@
-
 #define DEBUG //Output debugging info to Serial
 
 #include <Automaton.h>
@@ -8,12 +7,11 @@ void setup() {
   Serial.begin(115200);
 #endif
   button_init();
-  //display_init();
   ad5171_init();
 }
 
 void loop() {
-  button_loop();
+  automaton.run();
   ad5171_loop();
 }
 
