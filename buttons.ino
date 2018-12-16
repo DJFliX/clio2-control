@@ -33,8 +33,10 @@ static uint16_t threshold_list[] = { 80 };
 Atm_step cluster_stepper;
 
 void cmp_callback( int idx, int v, int pressed ) {
+    #ifdef DEBUG
     Serial.print(pressed);
     Serial.print(F(" "));
+    #endif
   // Do something when one of the thresholds is crossed
     switch(idx) {
       case GREEN:
@@ -45,11 +47,11 @@ void cmp_callback( int idx, int v, int pressed ) {
         } else if (brown_cluster.state()) {
           scroll_last_green = millis();
           if(pressed && millis() - scroll_last_blue < COMPERATOR_INTERVAL + 5) {
-            Serial.println(F("EVENT_GREEN, UP"));
-            scroll_up.press();
+            //Serial.println(F("EVENT_GREEN, UP"));
+            scroll_up.setState(1);
           } else if(pressed && millis() - scroll_last_yellow < COMPERATOR_INTERVAL + 5) {
-            Serial.println(F("EVENT_GREEN, DOWN"));
-            scroll_down.press();
+            //Serial.println(F("EVENT_GREEN, DOWN"));
+            scroll_down.setState(1);
           }
         }
         break;
@@ -61,27 +63,27 @@ void cmp_callback( int idx, int v, int pressed ) {
         } else if (brown_cluster.state()) {
           scroll_last_blue = millis();
           if(pressed && millis() - scroll_last_yellow < COMPERATOR_INTERVAL + 5) {
-            Serial.println(F("EVENT_BLUE, UP"));
-            scroll_up.press();
+            //Serial.println(F("EVENT_BLUE, UP"));
+            scroll_up.setState(1);
           } else if(pressed && millis() - scroll_last_green < COMPERATOR_INTERVAL + 5) {
-            Serial.println(F("EVENT_BLUE, DOWN"));
-            scroll_down.press();
+            //Serial.println(F("EVENT_BLUE, DOWN"));
+            scroll_down.setState(1);
           }
         }
         break;
       case YELLOW:
         if(red_cluster.state()) {
-          Serial.println(F("BTN_VOLUME_DOWN"));
+          volume_down.setState(pressed);
         } else if (black_cluster.state()) {
           src_left.setState(pressed);
         } else if (brown_cluster.state()) {
           scroll_last_yellow = millis();
           if(pressed && millis() - scroll_last_green < COMPERATOR_INTERVAL + 5) {
-            Serial.println(F("EVENT_YELLOW, UP"));
-            scroll_up.press();
+            //Serial.println(F("EVENT_YELLOW, UP"));
+            scroll_up.setState(1);
           } else if(pressed && millis() - scroll_last_blue < COMPERATOR_INTERVAL + 5) {
-            Serial.println(F("EVENT_YELLOW, DOWN"));
-            scroll_down.press();
+            //Serial.println(F("EVENT_YELLOW, DOWN"));
+            scroll_down.setState(1);
           }
         }
         break;
@@ -90,11 +92,13 @@ void cmp_callback( int idx, int v, int pressed ) {
 
 void step_callback(int idx, int new_state, int up) {
   if(new_state) {
+    #ifdef DEBUG
     Serial.print(idx);
     Serial.print(F(" "));
     Serial.print(new_state);
     Serial.print(F(" "));
     Serial.println(up);
+    #endif
     switch(idx) {
       case RED:
         black_cluster.off();
@@ -116,21 +120,25 @@ void step_callback(int idx, int new_state, int up) {
 }
 
 void scroll_cb(int a, int b, int c){ 
+  #ifdef DEBUG
   Serial.print(F("Scroll: "));
   Serial.print(a);
   Serial.print(F(" "));
   Serial.print(b);
   Serial.print(F(" "));
   Serial.println(c);
+  #endif
 }
 
 void butt_event_cb(int a, int b, int c){
+  #ifdef DEBUG
   Serial.print(F("Butt: "));
   Serial.print(a);
   Serial.print(F(" "));
   Serial.print(b);
   Serial.print(F(" "));
   Serial.println(c);
+  #endif
 }
 
 void button_init() {

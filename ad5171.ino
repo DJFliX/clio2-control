@@ -32,12 +32,16 @@ void ad5171_loop() {
 void ad5171_set_wiper(int value) {
   if(value == 64) {
     digitalWrite(HU_TRANSISTOR, LOW);
+    #ifdef DEBUG
     Serial.println(HU_NOOP);
     Serial.println(millis());
+    #endif
   } else {
     huCurrentOp = value;
+    #ifdef DEBUG
     Serial.println(value, DEC);
     Serial.println(millis());
+    #endif
     Wire.beginTransmission(44); // transmit to device #44 (0x2c)
     // device address is specified in datasheet
     Wire.write(byte(0x00));            // sends instruction byte

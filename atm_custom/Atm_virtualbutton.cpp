@@ -55,18 +55,8 @@ Atm_virtualbutton& Atm_virtualbutton::onPress( atm_cb_push_t callback, int idx /
   return *this;
 }
 
-Atm_virtualbutton& Atm_virtualbutton::onPress( Machine& machine, int event /* = 0 */ ) {
-  onpress.set( &machine, event );
-  return *this;
-}
-
 Atm_virtualbutton& Atm_virtualbutton::onRelease( atm_cb_push_t callback, int idx /* = 0 */ ) {
   onrelease.set( callback, idx );
-  return *this;
-}
-
-Atm_virtualbutton& Atm_virtualbutton::onRelease( Machine& machine, int event /* = 0 */ ) {
-  onrelease.set( &machine, event );
   return *this;
 }
 
@@ -81,27 +71,10 @@ Atm_virtualbutton& Atm_virtualbutton::repeat( int delay /* = 500 */, int speed /
   return *this;
 }
 
-Atm_virtualbutton& Atm_virtualbutton::press( void ) {
-  trigger( EVT_PRESS );
-  return *this;
-}
-
-Atm_virtualbutton& Atm_virtualbutton::release( void ) {
-  trigger( EVT_RELEASE );
-  return *this;
-}
-
 Atm_virtualbutton& Atm_virtualbutton::setState( char newState ) {
   if(newState)
     trigger( EVT_PRESS );
   else 
     trigger( EVT_RELEASE );
-  return *this;
-}
-
-Atm_virtualbutton& Atm_virtualbutton::trace( Stream& stream ) {
-  setTrace( &stream, atm_serial_debug::trace,
-            "BUTTON\0EVT_LMODE\0EVT_TIMER\0EVT_DELAY\0EVT_REPEAT\0EVT_PRESS\0EVT_RELEASE\0EVT_COUNTER\0"
-            "ELSE\0IDLE\0WAIT\0PRESSED\0REPEAT\0RELEASE\0LIDLE\0LWAIT\0LPRESSED\0LRELEASE\0WRELEASE\0AUTO" );
   return *this;
 }
