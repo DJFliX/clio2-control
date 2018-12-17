@@ -1,3 +1,5 @@
+#pragma once
+#ifdef AD5171
 #include <Wire.h>
 #include "headers/clio_pins.h"
 #include "headers/hu_commands.h"
@@ -51,4 +53,5 @@ void ad5171_set_wiper(int value) {
   }
 
 }
+#endif
 

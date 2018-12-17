@@ -1,5 +1,4 @@
-#ifndef __CLIO_HU_COMMANDS_H__
-#define __CLIO_HU_COMMANDS_H__
+#pragma once
 
 #define HU_ATT 4
 #define HU_DISPLAY 6
@@ -78,5 +77,3 @@
  * 63 = 53.3
  * 64 = INF
  */
-
-#endif

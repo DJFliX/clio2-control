@@ -1,0 +1,7 @@
+{
+    "programmer": "AVRISP mkII",
+    "board": "Optiboot:avr:optiboot28",
+    "configuration": "mhz=16MHz,cpu=atmega328p",
+    "port": "/dev/cu.usbmodem31",
+    "sketch": "clio2-control.ino"
+}

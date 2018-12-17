@@ -1,5 +1,4 @@
-#ifndef __CLIO_EVENTS_H__
-#define __CLIO_EVENTS_H__
+#pragma once
 
 #define NO_OP 0             //No Operation: No button was pressed
 #define SCROLL_UP 1         //Scroll up action
@@ -15,4 +14,3 @@
 #define EVENT_BLUE 16
 #define EVENT_YELLOW 17
 
-#endif
