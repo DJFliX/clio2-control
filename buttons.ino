@@ -4,6 +4,7 @@
 #define COMPERATOR_INTERVAL 30
 
 #include "atm_custom/Atm_virtualbutton.cpp"
+#include "atm_custom/Atm_buttoncluster.cpp"
 
 #define RED_CLUSTER 0
 #define BLACK_CLUSTER 1
@@ -13,7 +14,8 @@
 #define BLUE 1
 #define YELLOW 2
 
-Atm_bit clusters[3];
+Atm_buttoncluster cluster;
+
 Atm_comparator comparator[3];
 
 Atm_button debug_button;
@@ -47,11 +49,11 @@ void print_result(int idx, int v, int pressed) {
 void cmp_callback(int idx, int new_state, int pressed ) {
     switch(idx) {
       case GREEN:
-        if(clusters[RED_CLUSTER].state()) {
+        if(cluster.state() == cluster.CLUSTER_RED) {
           _toggle.trigger(pressed ? _toggle.EVT_PRESS : _toggle.EVT_RELEASE);
-        } else if (clusters[BLACK_CLUSTER].state()) {
+        } else if (cluster.state() == cluster.CLUSTER_BLACK) {
           src_right.trigger(pressed ? src_right.EVT_PRESS : src_right.EVT_RELEASE);
-        } else if (clusters[BROWN_CLUSTER].state()) {
+        } else if (cluster.state() == cluster.CLUSTER_BROWN) {
           scroll_last[idx] = millis();
           if(pressed && millis() - scroll_last[BLUE] < COMPERATOR_INTERVAL + 5) {
             scroll_up.trigger(scroll_up.EVT_PRESS);
@@ -61,11 +63,11 @@ void cmp_callback(int idx, int new_state, int pressed ) {
         }
         break;
       case BLUE:
-        if(clusters[RED_CLUSTER].state()) {
+        if(cluster.state() == cluster.CLUSTER_RED) {
           volume_up.trigger(pressed ? volume_up.EVT_PRESS : volume_up.EVT_RELEASE);
-        } else if (clusters[BLACK_CLUSTER].state()) {
+        } else if (cluster.state() == cluster.CLUSTER_BLACK) {
           volume_mute.trigger(pressed ? volume_mute.EVT_PRESS : volume_mute.EVT_RELEASE);
-        } else if (clusters[BROWN_CLUSTER].state()) {
+        } else if (cluster.state() == cluster.CLUSTER_BROWN) {
           scroll_last[idx] = millis();
           if(pressed && millis() - scroll_last[YELLOW] < COMPERATOR_INTERVAL + 5) {
             scroll_up.trigger(scroll_up.EVT_PRESS);
@@ -75,11 +77,11 @@ void cmp_callback(int idx, int new_state, int pressed ) {
         }
         break;
       case YELLOW:
-        if(clusters[RED_CLUSTER].state()) {
+        if(cluster.state() == cluster.CLUSTER_RED) {
           volume_down.trigger(pressed ? volume_down.EVT_PRESS : volume_down.EVT_RELEASE);
-        } else if (clusters[BLACK_CLUSTER].state()) {
+        } else if (cluster.state() == cluster.CLUSTER_BLACK) {
           src_left.trigger(pressed ? src_left.EVT_PRESS : src_left.EVT_RELEASE);
-        } else if (clusters[BROWN_CLUSTER].state()) {
+        } else if (cluster.state() == cluster.CLUSTER_BROWN) {
           scroll_last[idx] = millis();
           if(pressed && millis() - scroll_last[GREEN] < COMPERATOR_INTERVAL + 5) {
             scroll_up.trigger(scroll_up.EVT_PRESS);
@@ -88,26 +90,6 @@ void cmp_callback(int idx, int new_state, int pressed ) {
           }
         }
         break;
-  }
-}
-
-void step_callback(int idx, int new_state, int up) {
-  if(new_state) {
-    switch(idx) {
-      case RED_CLUSTER:
-        clusters[BLACK_CLUSTER].off();
-        clusters[BROWN_CLUSTER].off();
-        break;
-      case BROWN_CLUSTER:
-        clusters[RED_CLUSTER].off();
-        clusters[BLACK_CLUSTER].off();
-        break;
-      case BLACK_CLUSTER:
-        clusters[BROWN_CLUSTER].off();
-        clusters[RED_CLUSTER].off();
-        break;
-    }
-    delay(5);
   }
 }
 
@@ -126,15 +108,7 @@ void butt_event_cb(int idx, int up, int v){
 }
 
 void button_init() {
-  clusters[RED_CLUSTER].begin()
-    .onChange(step_callback, RED_CLUSTER)
-    .led(RED_PIN);
-  clusters[BLACK_CLUSTER].begin()
-    .onChange(step_callback, BLACK_CLUSTER)
-    .led(BLACK_PIN);
-  clusters[BROWN_CLUSTER].begin()
-    .onChange(step_callback, BROWN_CLUSTER)
-    .led(BROWN_PIN);
+  cluster.begin(RED_PIN, BROWN_PIN, BLACK_PIN);
 
   debug_button.begin(7)
     .onPress( cluster_stepper, cluster_stepper.EVT_STEP )
@@ -154,8 +128,9 @@ void button_init() {
     .onChange(cmp_callback, YELLOW);
 
   cluster_stepper.begin();
-  for(int i = RED_CLUSTER; i <= BROWN_CLUSTER; i++) {
-    cluster_stepper.onStep(i, clusters[i], clusters[i].EVT_ON);
+
+  for(int i = cluster.EVT_RED; i <= cluster.EVT_BLACK; i++) {
+    cluster_stepper.onStep(i, cluster, i);
   }
 
   scroll_up.begin().onPress(scroll_cb);
