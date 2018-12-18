@@ -19,7 +19,6 @@ class Atm_virtualbutton : public Machine {
  protected:
   static const int DEBOUNCE = 5;
   atm_connector onpress, onrelease;
-  char lastState;
   atm_timer_millis timer_debounce, timer_delay, timer_repeat;
 
   int event( int id );

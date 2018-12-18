@@ -18,7 +18,6 @@ Atm_virtualbutton &Atm_virtualbutton::begin()
   timer_debounce.set(DEBOUNCE);
   timer_delay.set(ATM_TIMER_OFF);
   timer_repeat.set(ATM_TIMER_OFF);
-  lastState = -1;
   return *this;
 }
 
@@ -32,10 +31,6 @@ int Atm_virtualbutton::event(int id)
     return timer_delay.expired(this);
   case EVT_REPEAT:
     return timer_repeat.expired(this);
-  case EVT_PRESS:
-    return lastState == 1; //!digitalRead( pin );
-  case EVT_RELEASE:
-    return lastState == -1; //digitalRead( pin );
   }
   return 0;
 }
@@ -46,11 +41,9 @@ void Atm_virtualbutton::action(int id)
   switch (id)
   {
   case ENT_PRESS:
-    lastState = 1;
-    onpress.push(0);
+    onpress.push(1);
     return;
   case ENT_RELEASE:
-    lastState = -1;
     onrelease.push(0);
     return;
   }

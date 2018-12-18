@@ -1,8 +1,7 @@
 #include "headers/clio_pins.h"
 #include "headers/clio_events.h"
 
-#define BUTTON_PRESS_THRESHOLD 100 //Minimum voltage before we consider the button pressed
-#define COMPERATOR_INTERVAL 35
+#define COMPERATOR_INTERVAL 30
 
 #include "atm_custom/Atm_virtualbutton.cpp"
 
@@ -28,6 +27,8 @@ Atm_virtualbutton volume_mute;
 Atm_virtualbutton src_right;
 Atm_virtualbutton src_left;
 
+Atm_timer timer;
+
 long scroll_last[3];
 
 static uint16_t threshold_list[] = { 80 };
@@ -44,47 +45,46 @@ void print_result(int idx, int v, int pressed) {
 #endif
 
 void cmp_callback(int idx, int new_state, int pressed ) {
-  // Do something when one of the thresholds is crossed
     switch(idx) {
       case GREEN:
         if(clusters[RED_CLUSTER].state()) {
-          _toggle.trigger(_toggle.EVT_PRESS);
+          _toggle.trigger(pressed ? _toggle.EVT_PRESS : _toggle.EVT_RELEASE);
         } else if (clusters[BLACK_CLUSTER].state()) {
-          src_right.trigger(src_right.EVT_PRESS);
+          src_right.trigger(pressed ? src_right.EVT_PRESS : src_right.EVT_RELEASE);
         } else if (clusters[BROWN_CLUSTER].state()) {
           scroll_last[idx] = millis();
           if(pressed && millis() - scroll_last[BLUE] < COMPERATOR_INTERVAL + 5) {
             scroll_up.trigger(scroll_up.EVT_PRESS);
           } else if(pressed && millis() - scroll_last[YELLOW] < COMPERATOR_INTERVAL + 5) {
-            scroll_down.trigger(scroll_up.EVT_PRESS);
+            scroll_down.trigger(scroll_down.EVT_PRESS);
           }
         }
         break;
       case BLUE:
         if(clusters[RED_CLUSTER].state()) {
-          volume_up.trigger(volume_up.EVT_PRESS);
+          volume_up.trigger(pressed ? volume_up.EVT_PRESS : volume_up.EVT_RELEASE);
         } else if (clusters[BLACK_CLUSTER].state()) {
-          volume_mute.trigger(volume_mute.EVT_PRESS);
+          volume_mute.trigger(pressed ? volume_mute.EVT_PRESS : volume_mute.EVT_RELEASE);
         } else if (clusters[BROWN_CLUSTER].state()) {
           scroll_last[idx] = millis();
           if(pressed && millis() - scroll_last[YELLOW] < COMPERATOR_INTERVAL + 5) {
             scroll_up.trigger(scroll_up.EVT_PRESS);
           } else if(pressed && millis() - scroll_last[GREEN] < COMPERATOR_INTERVAL + 5) {
-            scroll_down.trigger(scroll_up.EVT_PRESS);
+            scroll_down.trigger(scroll_down.EVT_PRESS);
           }
         }
         break;
       case YELLOW:
         if(clusters[RED_CLUSTER].state()) {
-          volume_down.trigger(volume_down.EVT_PRESS);
+          volume_down.trigger(pressed ? volume_down.EVT_PRESS : volume_down.EVT_RELEASE);
         } else if (clusters[BLACK_CLUSTER].state()) {
-          src_left.trigger(src_left.EVT_PRESS);
+          src_left.trigger(pressed ? src_left.EVT_PRESS : src_left.EVT_RELEASE);
         } else if (clusters[BROWN_CLUSTER].state()) {
           scroll_last[idx] = millis();
           if(pressed && millis() - scroll_last[GREEN] < COMPERATOR_INTERVAL + 5) {
             scroll_up.trigger(scroll_up.EVT_PRESS);
           } else if(pressed && millis() - scroll_last[BLUE] < COMPERATOR_INTERVAL + 5) {
-            scroll_down.trigger(scroll_up.EVT_PRESS);
+            scroll_down.trigger(scroll_down.EVT_PRESS);
           }
         }
         break;
@@ -118,7 +118,7 @@ void scroll_cb(int a, int b, int c){
 #endif
 }
 
-void butt_event_cb(int idx, int v, int up){
+void butt_event_cb(int idx, int up, int v){
 #ifdef DEBUG
   Serial.print(F("Butt: "));
   print_result(idx, v, up);
@@ -159,28 +159,18 @@ void button_init() {
   }
 
   scroll_up.begin().onPress(scroll_cb);
-    
   scroll_down.begin().onPress(scroll_cb);
   
   _toggle.begin().onPress(butt_event_cb, BTN_TOGGLE);
-  _toggle.trace(Serial);
-  volume_up.begin().onPress(butt_event_cb, BTN_VOLUME_UP);
-  volume_up.begin().onRelease(butt_event_cb, BTN_VOLUME_UP);
-  volume_up.trace(Serial);
-  volume_down.begin().onPress(butt_event_cb, BTN_VOLUME_DOWN);
-  volume_down.trace(Serial);
+  volume_up.begin().onPress(butt_event_cb, BTN_VOLUME_UP).repeat(500, 100);
+  volume_down.begin().onPress(butt_event_cb, BTN_VOLUME_DOWN).repeat(500, 100);
   volume_mute.begin().onPress(butt_event_cb, BTN_VOLUME_MUTE);
-  volume_mute.trace(Serial);
-  src_left.begin().onPress(butt_event_cb, BTN_SRC_LEFT);
-  src_left.trace(Serial);
-  src_right.begin().onPress(butt_event_cb, BTN_SRC_RIGHT);
-  src_right.trace(Serial);
+  src_left.begin().onPress(butt_event_cb, BTN_SRC_LEFT).repeat(500, 100);
+  src_right.begin().onPress(butt_event_cb, BTN_SRC_RIGHT).repeat(500, 100);
 
-  cluster_stepper.trigger(cluster_stepper.EVT_STEP);
-  volume_mute.trigger(volume_mute.EVT_PRESS);
+  /*timer.begin(50)
+    .repeat()
+    .onTimer(cluster_stepper, cluster_stepper.EVT_STEP)
+    .start();*/
+
 }
-
-
-
-
-
