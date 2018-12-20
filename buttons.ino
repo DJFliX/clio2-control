@@ -5,6 +5,7 @@
 
 #include "atm_custom/Atm_virtualbutton.cpp"
 #include "atm_custom/Atm_buttoncluster.cpp"
+#include "atm_custom/Atm_scrollwheel.cpp"
 
 #define RED_CLUSTER 0
 #define BLACK_CLUSTER 1
@@ -15,13 +16,12 @@
 #define YELLOW 2
 
 Atm_buttoncluster cluster;
+Atm_scrollwheel wheel;
 
 Atm_comparator comparator[3];
 
 Atm_button debug_button;
 
-Atm_virtualbutton scroll_up;
-Atm_virtualbutton scroll_down;
 Atm_virtualbutton _toggle;
 Atm_virtualbutton volume_up;
 Atm_virtualbutton volume_down;
@@ -54,12 +54,6 @@ void cmp_callback(int idx, int new_state, int pressed ) {
         } else if (cluster.state() == cluster.CLUSTER_BLACK) {
           src_right.trigger(pressed ? src_right.EVT_PRESS : src_right.EVT_RELEASE);
         } else if (cluster.state() == cluster.CLUSTER_BROWN) {
-          scroll_last[idx] = millis();
-          if(pressed && millis() - scroll_last[BLUE] < COMPERATOR_INTERVAL + 5) {
-            scroll_up.trigger(scroll_up.EVT_PRESS);
-          } else if(pressed && millis() - scroll_last[YELLOW] < COMPERATOR_INTERVAL + 5) {
-            scroll_down.trigger(scroll_down.EVT_PRESS);
-          }
         }
         break;
       case BLUE:
@@ -68,12 +62,6 @@ void cmp_callback(int idx, int new_state, int pressed ) {
         } else if (cluster.state() == cluster.CLUSTER_BLACK) {
           volume_mute.trigger(pressed ? volume_mute.EVT_PRESS : volume_mute.EVT_RELEASE);
         } else if (cluster.state() == cluster.CLUSTER_BROWN) {
-          scroll_last[idx] = millis();
-          if(pressed && millis() - scroll_last[YELLOW] < COMPERATOR_INTERVAL + 5) {
-            scroll_up.trigger(scroll_up.EVT_PRESS);
-          } else if(pressed && millis() - scroll_last[GREEN] < COMPERATOR_INTERVAL + 5) {
-            scroll_down.trigger(scroll_down.EVT_PRESS);
-          }
         }
         break;
       case YELLOW:
@@ -82,15 +70,16 @@ void cmp_callback(int idx, int new_state, int pressed ) {
         } else if (cluster.state() == cluster.CLUSTER_BLACK) {
           src_left.trigger(pressed ? src_left.EVT_PRESS : src_left.EVT_RELEASE);
         } else if (cluster.state() == cluster.CLUSTER_BROWN) {
-          scroll_last[idx] = millis();
-          if(pressed && millis() - scroll_last[GREEN] < COMPERATOR_INTERVAL + 5) {
-            scroll_up.trigger(scroll_up.EVT_PRESS);
-          } else if(pressed && millis() - scroll_last[BLUE] < COMPERATOR_INTERVAL + 5) {
-            scroll_down.trigger(scroll_down.EVT_PRESS);
-          }
         }
         break;
+        if(isPressed) wheel.trigger(wheel.EVT_AH);
+        else wheel.trigger(wheel.EVT_AL);
+        if(isPressed) wheel.trigger(wheel.EVT_BH);
+        else wheel.trigger(wheel.EVT_BL);
+        if(isPressed) wheel.trigger(wheel.EVT_CH);
+        else wheel.trigger(wheel.EVT_CL);
   }
+  cluster_stepper.trigger(cluster_stepper.EVT_STEP);
 }
 
 void scroll_cb(int a, int b, int c){ 
@@ -133,15 +122,16 @@ void button_init() {
     cluster_stepper.onStep(i, cluster, i);
   }
 
-  scroll_up.begin().onPress(scroll_cb);
-  scroll_down.begin().onPress(scroll_cb);
-  
   _toggle.begin().onPress(butt_event_cb, BTN_TOGGLE);
   volume_up.begin().onPress(butt_event_cb, BTN_VOLUME_UP).repeat(500, 100);
   volume_down.begin().onPress(butt_event_cb, BTN_VOLUME_DOWN).repeat(500, 100);
   volume_mute.begin().onPress(butt_event_cb, BTN_VOLUME_MUTE);
   src_left.begin().onPress(butt_event_cb, BTN_SRC_LEFT).repeat(500, 100);
   src_right.begin().onPress(butt_event_cb, BTN_SRC_RIGHT).repeat(500, 100);
+
+  wheel.begin()
+    .onUp(scroll_cb)
+    .onDown(scroll_cb);
 
   /*timer.begin(50)
     .repeat()
