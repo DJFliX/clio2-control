@@ -9,8 +9,3 @@
 #define BTN_SRC_LEFT 6      //Button press: Source rotate to left
 #define BTN_SRC_RIGHT 7     //Button press: Source rotate to right
 #define BTN_TOGGLE 8        //Button press: The toggle thing at the bottom of the controller
-
-#define EVENT_GREEN 15
-#define EVENT_BLUE 16
-#define EVENT_YELLOW 17
-
