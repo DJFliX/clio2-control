@@ -39,40 +39,47 @@ void print_result(int idx, int v, int pressed) {
 }
 #endif
 
+void trigger_vbutton_response(int response, Atm_virtualbutton *button);
+
+void trigger_vbutton_response(int response, Atm_virtualbutton *button) {
+  if(response == 1) button->trigger(3);
+  else button->trigger(4);
+}
+
 void cmp_callback(int idx, int new_state, int pressed ) {
-    switch(idx) {
-      case GREEN:
-        if(cluster.state() == cluster.CLUSTER_RED) {
-          _toggle.trigger(pressed ? _toggle.EVT_PRESS : _toggle.EVT_RELEASE);
-        } else if (cluster.state() == cluster.CLUSTER_BLACK) {
-          src_right.trigger(pressed ? src_right.EVT_PRESS : src_right.EVT_RELEASE);
-        } else if (cluster.state() == cluster.CLUSTER_BROWN) {
-        }
-        break;
-      case BLUE:
-        if(cluster.state() == cluster.CLUSTER_RED) {
-          volume_up.trigger(pressed ? volume_up.EVT_PRESS : volume_up.EVT_RELEASE);
-        } else if (cluster.state() == cluster.CLUSTER_BLACK) {
-          volume_mute.trigger(pressed ? volume_mute.EVT_PRESS : volume_mute.EVT_RELEASE);
-        } else if (cluster.state() == cluster.CLUSTER_BROWN) {
-        }
-        break;
-      case YELLOW:
-        if(cluster.state() == cluster.CLUSTER_RED) {
-          volume_down.trigger(pressed ? volume_down.EVT_PRESS : volume_down.EVT_RELEASE);
-        } else if (cluster.state() == cluster.CLUSTER_BLACK) {
-          src_left.trigger(pressed ? src_left.EVT_PRESS : src_left.EVT_RELEASE);
-        } else if (cluster.state() == cluster.CLUSTER_BROWN) {
-        }
-        break;
-        if(isPressed) wheel.trigger(wheel.EVT_AH);
+  int current_cluster = cluster.state();
+  switch(idx) {
+    case GREEN:
+      if(current_cluster == cluster.CLUSTER_RED) {
+        trigger_vbutton_response(pressed, &_toggle);
+      } else if (current_cluster == cluster.CLUSTER_BLACK) {
+        trigger_vbutton_response(pressed, &src_right);
+      } else if (current_cluster == cluster.CLUSTER_BROWN) {
+        if(pressed) wheel.trigger(wheel.EVT_AH);
         else wheel.trigger(wheel.EVT_AL);
-        if(isPressed) wheel.trigger(wheel.EVT_BH);
+      }
+      break;
+    case BLUE:
+      if(current_cluster == cluster.CLUSTER_RED) {
+        trigger_vbutton_response(pressed, &volume_up);
+      } else if (current_cluster == cluster.CLUSTER_BLACK) {
+        trigger_vbutton_response(pressed, &volume_mute);
+      } else if (current_cluster == cluster.CLUSTER_BROWN) {
+        if(pressed) wheel.trigger(wheel.EVT_BH);
         else wheel.trigger(wheel.EVT_BL);
-        if(isPressed) wheel.trigger(wheel.EVT_CH);
+      }
+      break;
+    case YELLOW:
+      if(current_cluster == cluster.CLUSTER_RED) {
+        trigger_vbutton_response(pressed, &volume_down);
+      } else if (current_cluster == cluster.CLUSTER_BLACK) {
+        trigger_vbutton_response(pressed, &src_left);
+      } else if (current_cluster == cluster.CLUSTER_BROWN) {
+        if(pressed) wheel.trigger(wheel.EVT_CH);
         else wheel.trigger(wheel.EVT_CL);
+      }
+      break;
   }
-  cluster_stepper.trigger(cluster_stepper.EVT_STEP);
 }
 
 void scroll_cb(int a, int b, int c){ 
@@ -123,12 +130,21 @@ void button_init() {
     cluster_stepper.onStep(i, cluster, i);
   }
 
-  _toggle.begin().onPress(butt_event_cb, BTN_TOGGLE);
-  volume_up.begin().onPress(butt_event_cb, BTN_VOLUME_UP).repeat(500, 100);
-  volume_down.begin().onPress(butt_event_cb, BTN_VOLUME_DOWN).repeat(500, 100);
-  volume_mute.begin().onPress(butt_event_cb, BTN_VOLUME_MUTE);
-  src_left.begin().onPress(butt_event_cb, BTN_SRC_LEFT).repeat(500, 100);
-  src_right.begin().onPress(butt_event_cb, BTN_SRC_RIGHT).repeat(500, 100);
+  _toggle.begin()
+    .onPress(butt_event_cb, BTN_TOGGLE);
+  volume_up.begin()
+    .onPress(butt_event_cb, BTN_VOLUME_UP);
+  volume_down.begin()
+    .onPress(butt_event_cb, BTN_VOLUME_DOWN);
+  volume_mute.begin()
+    .onPress(butt_event_cb, BTN_VOLUME_MUTE);
+  src_left.begin()
+    .onPress(butt_event_cb, BTN_SRC_LEFT);
+  src_right.begin()
+    .onPress(butt_event_cb, BTN_SRC_RIGHT);
+
+  hu.begin()
+    .trace(Serial);
 
   wheel.begin()
     .onUp(scroll_cb)
