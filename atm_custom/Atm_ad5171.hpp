@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Automaton.h>
+
 #define HU_ATT 4
 #define HU_DISPLAY 6
 #define HU_UP 9
@@ -11,7 +13,7 @@
 #define HU_BAND_ESCAPE 50
 #define HU_NOOP 64
 
-#define HU_DURATION_MS 150
+#define HU_DURATION_MS 50
 /*
  * 0 = 94
  * 1 = 940
@@ -77,3 +79,23 @@
  * 63 = 53.3
  * 64 = INF
  */
+
+class Atm_ad5171 : public Machine {
+ public:
+  enum { IDLE, BUSY }; //STATES
+  enum { EVT_TIMER, EVT_CHANGE, ELSE }; // EVENTS
+  enum { ENT_IDLE, ENT_BUSY }; //ACTIONS
+
+  Atm_ad5171( void ) : Machine(){};
+  Atm_ad5171& begin( void );
+  Atm_ad5171& setState( char );
+  Atm_ad5171& trace( Stream& stream );
+
+ protected:
+  atm_timer_millis timer_release;
+  Atm_ad5171& setWiper( void );
+  char desired_op;
+  char current_op;
+  int event( int id );
+  void action( int id );
+};

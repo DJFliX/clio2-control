@@ -1,26 +1,17 @@
 #include "headers/clio_pins.h"
 #include "headers/clio_events.h"
 
-#define COMPERATOR_INTERVAL 30
+#define COMPERATOR_INTERVAL 10
 
 #include "atm_custom/Atm_virtualbutton.cpp"
 #include "atm_custom/Atm_buttoncluster.cpp"
 #include "atm_custom/Atm_scrollwheel.cpp"
-
-#define RED_CLUSTER 0
-#define BLACK_CLUSTER 1
-#define BROWN_CLUSTER 2
-
-#define GREEN 0
-#define BLUE 1
-#define YELLOW 2
+#include "atm_custom/Atm_ad5171.cpp"
 
 Atm_buttoncluster cluster;
 Atm_scrollwheel wheel;
 
 Atm_comparator comparator[3];
-
-Atm_button debug_button;
 
 Atm_virtualbutton _toggle;
 Atm_virtualbutton volume_up;
@@ -30,6 +21,8 @@ Atm_virtualbutton src_right;
 Atm_virtualbutton src_left;
 
 Atm_timer timer;
+
+Atm_ad5171 hu;
 
 long scroll_last[3];
 
@@ -90,19 +83,27 @@ void scroll_cb(int a, int b, int c){
 }
 
 void butt_event_cb(int idx, int up, int v){
-#ifdef DEBUG
-  Serial.print(F("Butt: "));
-  print_result(idx, v, up);
-#endif
+  switch (idx) {
+    case BTN_VOLUME_DOWN:
+      hu.setState(HU_VOL_DOWN);
+      break;
+    case BTN_VOLUME_UP:
+      hu.setState(HU_VOL_UP);
+      break;
+    case BTN_TOGGLE:
+      hu.setState(HU_DISPLAY);
+      break;
+    default:
+      #ifdef DEBUG
+        Serial.print(F("Butt: "));
+        print_result(idx, v, up);
+      #endif
+      break;
+  }
 }
 
 void button_init() {
   cluster.begin(RED_PIN, BROWN_PIN, BLACK_PIN);
-
-  debug_button.begin(7)
-    .onPress( cluster_stepper, cluster_stepper.EVT_STEP )
-    .debounce( 10 )
-    .repeat();
 
   comparator[GREEN].begin(GREEN_PIN, COMPERATOR_INTERVAL)
     .threshold(threshold_list, sizeof( threshold_list ))
@@ -133,9 +134,9 @@ void button_init() {
     .onUp(scroll_cb)
     .onDown(scroll_cb);
 
-  /*timer.begin(50)
+  timer.begin(10)
     .repeat()
     .onTimer(cluster_stepper, cluster_stepper.EVT_STEP)
-    .start();*/
+    .start();
 
 }
