@@ -63,6 +63,8 @@ Atm_ad5171 &Atm_ad5171::setWiper()
     if(current_op == HU_NOOP) {
         digitalWrite(HU_TRANSISTOR, LOW);
         _tmp_op = 64;
+    } else {
+        _tmp_op = current_op - 64;
     }
 
     Wire.beginTransmission(44); // transmit to device #44 (0x2c)

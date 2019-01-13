@@ -16,7 +16,7 @@ Atm_virtualbutton &Atm_virtualbutton::begin()
   // clang-format on
   Machine::begin(state_table, ELSE);
   timer_debounce.set(DEBOUNCE);
-  timer_delay.set(ATM_TIMER_OFF);
+  timer_delay.set(250);
   timer_repeat.set(ATM_TIMER_OFF);
   return *this;
 }
@@ -27,7 +27,7 @@ int Atm_virtualbutton::event(int id)
   {
   case EVT_TIMER:
     return timer_debounce.expired(this);
-  case EVT_DELAY:
+  case EVT_RELEASE:
     return timer_delay.expired(this);
   case EVT_REPEAT:
     return timer_repeat.expired(this);
@@ -61,12 +61,6 @@ Atm_virtualbutton &Atm_virtualbutton::onRelease(atm_cb_push_t callback, int idx 
   return *this;
 }
 
-Atm_virtualbutton &Atm_virtualbutton::debounce(int delay)
-{
-  timer_debounce.set(delay);
-  return *this;
-}
-
 Atm_virtualbutton &Atm_virtualbutton::repeat(int delay /* = 500 */, int speed /* = 50 */)
 {
   timer_delay.set(delay);
@@ -77,6 +71,6 @@ Atm_virtualbutton &Atm_virtualbutton::repeat(int delay /* = 500 */, int speed /*
 Atm_virtualbutton &Atm_virtualbutton::trace(Stream &stream)
 {
   setTrace(&stream, atm_serial_debug::trace,
-           "VBUTTON\0EVT_TIMER\0EVT_DELAY\0EVT_REPEAT\0EVT_PRESS\0EVT_RELEASE\0ELSE\0IDLE\0WAIT\0PRESSED\0REPEAT\0RELEASE");
+    "VBUTTON\0EVT_TIMER\0EVT_DELAY\0EVT_REPEAT\0EVT_PRESS\0EVT_RELEASE\0ELSE\0IDLE\0WAIT\0PRESSED\0REPEAT\0RELEASE");
   return *this;
 }

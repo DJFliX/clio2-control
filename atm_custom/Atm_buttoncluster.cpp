@@ -1,7 +1,7 @@
 #pragma once
 #include "Atm_buttoncluster.hpp"
 
-Atm_buttoncluster &Atm_buttoncluster::begin(char _red_pin, char _brown_pin, char _black_pin )
+Atm_buttoncluster &Atm_buttoncluster::begin()
 {
     // clang-format off
   const static state_t state_table[] PROGMEM = {
@@ -13,12 +13,9 @@ Atm_buttoncluster &Atm_buttoncluster::begin(char _red_pin, char _brown_pin, char
   };
     // clang-format on
     Machine::begin(state_table, ELSE);
-    pinMode(_red_pin, OUTPUT);
-    pinMode(_brown_pin, OUTPUT);
-    pinMode(_black_pin, OUTPUT);
-    red_pin = _red_pin;
-    brown_pin = _brown_pin;
-    black_pin = _black_pin;
+    pinMode(RED_PIN, OUTPUT);
+    pinMode(BROWN_PIN, OUTPUT);
+    pinMode(BLACK_PIN, OUTPUT);
     return *this;
 }
 
@@ -33,22 +30,22 @@ void Atm_buttoncluster::action(int id)
     switch (id)
     {
     case ENT_RED:
-        digitalWrite(red_pin, HIGH);
+        digitalWrite(RED_PIN, HIGH);
         return;
     case ENT_BROWN:
-        digitalWrite(brown_pin, HIGH);
+        digitalWrite(BROWN_PIN, HIGH);
         return;
     case ENT_BLACK:
-        digitalWrite(black_pin, HIGH);
+        digitalWrite(BLACK_PIN, HIGH);
         return;
     case EXIT_RED:
-        digitalWrite(red_pin, LOW);
+        digitalWrite(RED_PIN, LOW);
         return;
     case EXIT_BROWN:
-        digitalWrite(brown_pin, LOW);
+        digitalWrite(BROWN_PIN, LOW);
         return;
     case EXIT_BLACK:
-        digitalWrite(black_pin, LOW);
+        digitalWrite(BLACK_PIN, LOW);
         return;
     }
 }

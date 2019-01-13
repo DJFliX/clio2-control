@@ -5,14 +5,9 @@
 void setup() {
   Serial.begin(115200);
   Wire.begin();
-
   button_init();
 }
 
 void loop() {
   automaton.run();
 }
-
-
-
-

@@ -1,5 +1,7 @@
 #pragma once
+
 #include <Automaton.h>
+#include "../headers/clio_pins.h"
 
 class Atm_buttoncluster : public Machine {
  public:
@@ -8,11 +10,11 @@ class Atm_buttoncluster : public Machine {
   enum { ENT_RED, ENT_BROWN, ENT_BLACK, EXIT_RED, EXIT_BROWN, EXIT_BLACK }; //ACTIONS
 
   Atm_buttoncluster( void ) : Machine(){};
-  Atm_buttoncluster& begin( char _red_pin, char _brown_pin, char _black_pin );
+  Atm_buttoncluster& begin( void );
   Atm_buttoncluster& trace( Stream& stream );
 
  protected:
-  char red_pin, brown_pin, black_pin;
+ 
   int event( int id );
   void action( int id );
 };

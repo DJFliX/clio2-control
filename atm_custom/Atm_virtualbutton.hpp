@@ -13,7 +13,6 @@ class Atm_virtualbutton : public Machine {
   Atm_virtualbutton& trace( Stream& stream );
   Atm_virtualbutton& onPress( atm_cb_push_t callback, int idx = 0 );
   Atm_virtualbutton& onRelease( atm_cb_push_t callback, int idx = 0 );
-  Atm_virtualbutton& debounce( int delay );
   Atm_virtualbutton& repeat( int delay = 500, int speed = 50 );
 
  protected:

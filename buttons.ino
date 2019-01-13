@@ -42,8 +42,8 @@ void print_result(int idx, int v, int pressed) {
 void trigger_vbutton_response(int response, Atm_virtualbutton *button);
 
 void trigger_vbutton_response(int response, Atm_virtualbutton *button) {
-  if(response == 1) button->trigger(3);
-  else button->trigger(4);
+  if(response == 1) button->trigger(_toggle.EVT_PRESS);
+  else button->trigger(_toggle.EVT_RELEASE);
 }
 
 void cmp_callback(int idx, int new_state, int pressed ) {
@@ -83,10 +83,18 @@ void cmp_callback(int idx, int new_state, int pressed ) {
 }
 
 void scroll_cb(int a, int b, int c){ 
-#ifdef DEBUG
-  Serial.print(F("Scroll: "));
-  print_result(a, b, c);
-#endif
+  switch(c) {
+    case 0:
+      hu.setState(HU_UP);
+      break;
+    case 1:
+      hu.setState(HU_DOWN);
+      break;
+  }
+  #ifdef DEBUG
+    Serial.print(F("Scroll: "));
+    print_result(a, b, c);
+  #endif
 }
 
 void butt_event_cb(int idx, int up, int v){
@@ -97,8 +105,17 @@ void butt_event_cb(int idx, int up, int v){
     case BTN_VOLUME_UP:
       hu.setState(HU_VOL_UP);
       break;
+    case BTN_VOLUME_MUTE:
+      hu.setState(HU_ATT);
+      break;
     case BTN_TOGGLE:
       hu.setState(HU_DISPLAY);
+      break;
+    case BTN_SRC_LEFT:
+      hu.setState(HU_PREV);
+      break;
+    case BTN_SRC_RIGHT:
+      hu.setState(HU_NEXT);
       break;
     default:
       #ifdef DEBUG
@@ -110,7 +127,7 @@ void butt_event_cb(int idx, int up, int v){
 }
 
 void button_init() {
-  cluster.begin(RED_PIN, BROWN_PIN, BLACK_PIN);
+  cluster.begin();
 
   comparator[GREEN].begin(GREEN_PIN, COMPERATOR_INTERVAL)
     .threshold(threshold_list, sizeof( threshold_list ))
@@ -143,8 +160,7 @@ void button_init() {
   src_right.begin()
     .onPress(butt_event_cb, BTN_SRC_RIGHT);
 
-  hu.begin()
-    .trace(Serial);
+  hu.begin();
 
   wheel.begin()
     .onUp(scroll_cb)
