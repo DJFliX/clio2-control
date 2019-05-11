@@ -42,42 +42,37 @@ void print_result(int idx, int v, int pressed) {
 void trigger_vbutton_response(int response, Atm_virtualbutton *button);
 
 void trigger_vbutton_response(int response, Atm_virtualbutton *button) {
-  if(response == 1) button->trigger(_toggle.EVT_PRESS);
-  else button->trigger(_toggle.EVT_RELEASE);
+  if(response == 1) button->trigger(volume_up.EVT_PRESS);
+  else button->trigger(volume_up.EVT_RELEASE);
+}
+
+void handleSpecificCluster(int pressed, int current_cluster, Atm_virtualbutton *redButton, Atm_virtualbutton *blackButton, int wheelEvtIfPressed, int wheelEvtIfUnpressed);
+
+void handleSpecificCluster(int pressed, int current_cluster, Atm_virtualbutton *redButton, Atm_virtualbutton *blackButton, int wheelEvtIfPressed, int wheelEvtIfUnpressed) {
+  switch(current_cluster) {
+    case cluster.CLUSTER_RED:
+      trigger_vbutton_response(pressed, redButton);
+      break;
+    case cluster.CLUSTER_BLACK:
+      trigger_vbutton_response(pressed, blackButton);
+      break;
+    case cluster.CLUSTER_BROWN:
+      wheel.trigger(pressed ? wheelEvtIfPressed : wheelEvtIfUnpressed);
+      break;
+  }
 }
 
 void cmp_callback(int idx, int new_state, int pressed ) {
   int current_cluster = cluster.state();
   switch(idx) {
     case GREEN:
-      if(current_cluster == cluster.CLUSTER_RED) {
-        trigger_vbutton_response(pressed, &_toggle);
-      } else if (current_cluster == cluster.CLUSTER_BLACK) {
-        trigger_vbutton_response(pressed, &src_right);
-      } else if (current_cluster == cluster.CLUSTER_BROWN) {
-        if(pressed) wheel.trigger(wheel.EVT_AH);
-        else wheel.trigger(wheel.EVT_AL);
-      }
+      handleSpecificCluster(pressed, current_cluster, &_toggle, &src_right, wheel.EVT_AH, wheel.EVT_AL);
       break;
     case BLUE:
-      if(current_cluster == cluster.CLUSTER_RED) {
-        trigger_vbutton_response(pressed, &volume_up);
-      } else if (current_cluster == cluster.CLUSTER_BLACK) {
-        trigger_vbutton_response(pressed, &volume_mute);
-      } else if (current_cluster == cluster.CLUSTER_BROWN) {
-        if(pressed) wheel.trigger(wheel.EVT_BH);
-        else wheel.trigger(wheel.EVT_BL);
-      }
+      handleSpecificCluster(pressed, current_cluster, &volume_up, &volume_mute, wheel.EVT_BH, wheel.EVT_BL);
       break;
     case YELLOW:
-      if(current_cluster == cluster.CLUSTER_RED) {
-        trigger_vbutton_response(pressed, &volume_down);
-      } else if (current_cluster == cluster.CLUSTER_BLACK) {
-        trigger_vbutton_response(pressed, &src_left);
-      } else if (current_cluster == cluster.CLUSTER_BROWN) {
-        if(pressed) wheel.trigger(wheel.EVT_CH);
-        else wheel.trigger(wheel.EVT_CL);
-      }
+      handleSpecificCluster(pressed, current_cluster, &volume_down, &src_left, wheel.EVT_CH, wheel.EVT_CL);
       break;
   }
 }
@@ -91,7 +86,7 @@ void scroll_cb(int a, int b, int c){
       hu.setState(HU_DOWN);
       break;
   }
-  #ifdef DEBUG
+  #ifdef DEBUGLL
     Serial.print(F("Scroll: "));
     print_result(a, b, c);
   #endif
@@ -166,7 +161,7 @@ void button_init() {
     .onUp(scroll_cb)
     .onDown(scroll_cb);
 
-  timer.begin(10)
+  timer.begin(20)
     .repeat()
     .onTimer(cluster_stepper, cluster_stepper.EVT_STEP)
     .start();
