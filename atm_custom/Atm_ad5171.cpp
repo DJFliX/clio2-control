@@ -68,8 +68,9 @@ Atm_ad5171 &Atm_ad5171::setWiper()
     }
 
     Wire.beginTransmission(44); // transmit to device #44 (0x2c)
-    Wire.write(byte(0x00));     // sends instruction byte
-    Wire.write(byte(_tmp_op));     // sends potentiometer value byte
+    //Wire.write(0);     // sends instruction byte
+    //Wire.write(_tmp_op);     // sends potentiometer value byte
+    Wire.write(2);     // sends potentiometer value byte
     Wire.endTransmission();     // stop transmitting
     
     if(current_op != HU_NOOP) {

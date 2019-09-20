@@ -3,10 +3,10 @@
 #include <Automaton.h>
 
 void setup() {
-  //Serial.begin(115200);
+  Serial.begin(115200);
   Wire.begin();
   button_init();
-  analogReadResolution(8);
+  //analogReadResolution(8);
 }
 
 void loop() {

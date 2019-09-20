@@ -86,7 +86,7 @@ void scroll_cb(int a, int b, int c){
       hu.setState(HU_DOWN);
       break;
   }
-  #ifdef DEBUGLL
+  #ifdef DEBUG
     Serial.print(F("Scroll: "));
     print_result(a, b, c);
   #endif
@@ -101,7 +101,7 @@ void butt_event_cb(int idx, int up, int v){
       hu.setState(HU_VOL_UP);
       break;
     case BTN_VOLUME_MUTE:
-      hu.setState(HU_ATT);
+      hu.setState(HU_BAND_ESCAPE); //HU_ATT
       break;
     case BTN_TOGGLE:
       hu.setState(HU_DISPLAY);
@@ -155,7 +155,7 @@ void button_init() {
   src_right.begin()
     .onPress(butt_event_cb, BTN_SRC_RIGHT);
 
-  hu.begin();
+  hu.begin().trace(Serial);
 
   wheel.begin()
     .onUp(scroll_cb)
