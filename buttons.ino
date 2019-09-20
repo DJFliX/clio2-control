@@ -77,15 +77,8 @@ void cmp_callback(int idx, int new_state, int pressed ) {
   }
 }
 
-void scroll_cb(int a, int b, int c){ 
-  switch(c) {
-    case 0:
-      hu.setState(HU_UP);
-      break;
-    case 1:
-      hu.setState(HU_DOWN);
-      break;
-  }
+void scroll_cb(int a, int b, int c){
+  hu.setState(c == 0 ? HU_UP : HU_DOWN);
   #ifdef DEBUG
     Serial.print(F("Scroll: "));
     print_result(a, b, c);

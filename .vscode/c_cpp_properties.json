@@ -3,9 +3,12 @@
         {
             "name": "Mac",
             "includePath": [
-                "/Users/flix/Library/Arduino15/packages/Optiboot/hardware/avr/0.8.0/**",
                 "${workspaceFolder}/**",
+                "/Users/flix/Library/Arduino15/packages/arduino/tools/**",
+                "/Users/flix/Library/Arduino15/packages/arduino/hardware/avr/1.6.23/**",
+                "/Users/flix/Library/Arduino15/packages/Optiboot/hardware/avr/0.8.0/**",
                 "/Users/flix/Documents/Arduino/libraries/Automaton/src/**",
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/libraries/Wire/**",
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino",
                 "/Applications/Arduino.app/Contents/Java/hardware/tools/avr/avr/include/**",
                 "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/variants/standard"

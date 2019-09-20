@@ -2,18 +2,23 @@
 
 #include <Automaton.h>
 
-#define HU_ATT 4
-#define HU_DISPLAY 6
-#define HU_UP 9
-#define HU_NEXT 9
+#define HU_ATT 1
+#define HU_VOL_UP 3
+#define HU_VOL_DOWN 5
+
+#define HU_DISPLAY 7
+
+#define HU_PREV 9
+#define HU_NEXT 11
+
 #define HU_DOWN 13
-#define HU_PREV 13
-#define HU_VOL_UP 16
-#define HU_VOL_DOWN 24
-#define HU_BAND_ESCAPE 50
+#define HU_UP 15
+
+#define HU_BAND_ESCAPE 17
+
 #define HU_NOOP 64
 
-#define HU_DURATION_MS 50
+#define HU_DURATION_MS 60
 /*
  * 0 = 94
  * 1 = 940

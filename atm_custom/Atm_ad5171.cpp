@@ -17,7 +17,7 @@ Atm_ad5171 &Atm_ad5171::begin()
     digitalWrite(HU_TRANSISTOR, LOW);
 
     current_op = 255;
-    desired_op = 36;
+    desired_op = 64;
 
     setWiper();
 
@@ -58,24 +58,23 @@ Atm_ad5171 &Atm_ad5171::setState(char new_state)
 
 Atm_ad5171 &Atm_ad5171::setWiper()
 {
-    current_op = desired_op;
-    byte _tmp_op = current_op;
-    if(current_op == HU_NOOP) {
-        digitalWrite(HU_TRANSISTOR, LOW);
-        _tmp_op = 64;
-    } else {
-        _tmp_op = current_op - 64;
-    }
+  current_op = desired_op;
+  byte _tmp_op = current_op;
+  if(current_op == HU_NOOP) {
+      digitalWrite(HU_TRANSISTOR, LOW);
+      _tmp_op = 64;
+  } else {
+    _tmp_op = 64 - current_op;
+  }
 
-    Wire.beginTransmission(44); // transmit to device #44 (0x2c)
-    //Wire.write(0);     // sends instruction byte
-    //Wire.write(_tmp_op);     // sends potentiometer value byte
-    Wire.write(2);     // sends potentiometer value byte
-    Wire.endTransmission();     // stop transmitting
-    
-    if(current_op != HU_NOOP) {
-        digitalWrite(HU_TRANSISTOR, HIGH);
-    }
+  Wire.beginTransmission(44); // transmit to device #44 (0x2c)
+  Wire.write(byte(0x00));     // sends instruction byte
+  Wire.write(_tmp_op);     // sends potentiometer value byte
+  Wire.endTransmission();     // stop transmitting
+  
+  if(current_op != HU_NOOP) {
+      digitalWrite(HU_TRANSISTOR, HIGH);
+  }
 }
 
 Atm_ad5171 &Atm_ad5171::trace(Stream &stream)

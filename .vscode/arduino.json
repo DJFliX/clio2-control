@@ -1,7 +1,7 @@
 {
     "programmer": "AVRISP mkII",
     "board": "Optiboot:avr:optiboot28",
-    "configuration": "mhz=16MHz,cpu=atmega328p",
     "port": "/dev/cu.usbserial-A50280AD",
-    "sketch": "clio2-control.ino"
+    "sketch": "clio2-control.ino",
+    "configuration": "mhz=16MHz,cpu=atmega328p"
 }
