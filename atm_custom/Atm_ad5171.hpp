@@ -19,6 +19,7 @@
 #define HU_NOOP 64
 
 #define HU_DURATION_MS 60
+#define HU_LONG_DURATION_MS 2000
 /*
  * 0 = 94
  * 1 = 940

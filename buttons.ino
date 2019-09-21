@@ -94,10 +94,10 @@ void butt_event_cb(int idx, int up, int v){
       hu.setState(HU_VOL_UP);
       break;
     case BTN_VOLUME_MUTE:
-      hu.setState(HU_BAND_ESCAPE); //HU_ATT
+      hu.setState(HU_ATT);
       break;
     case BTN_TOGGLE:
-      hu.setState(HU_DISPLAY);
+      hu.setState(HU_BAND_ESCAPE);
       break;
     case BTN_SRC_LEFT:
       hu.setState(HU_PREV);
