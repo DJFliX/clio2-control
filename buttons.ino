@@ -26,75 +26,49 @@ Atm_ad5171 hu;
 
 long scroll_last[3];
 
-static uint16_t threshold_list[] = { 80 };
+static uint16_t threshold_list[] = { 60 };
 Atm_step cluster_stepper;
-
-#ifdef DEBUG
-void print_result(int idx, int v, int pressed) {
-  Serial.print(idx);
-  Serial.print(F(" "));
-  Serial.print(v);
-  Serial.print(F(" "));
-  Serial.println(pressed);
-}
-#endif
 
 void trigger_vbutton_response(int response, Atm_virtualbutton *button);
 
 void trigger_vbutton_response(int response, Atm_virtualbutton *button) {
-  if(response == 1) button->trigger(_toggle.EVT_PRESS);
-  else button->trigger(_toggle.EVT_RELEASE);
+  if(response == 1) button->trigger(volume_up.EVT_PRESS);
+  else button->trigger(volume_up.EVT_RELEASE);
+}
+
+void handleSpecificCluster(int pressed, int current_cluster, Atm_virtualbutton *redButton, Atm_virtualbutton *blackButton, int wheelEvtIfPressed, int wheelEvtIfUnpressed);
+
+void handleSpecificCluster(int pressed, int current_cluster, Atm_virtualbutton *redButton, Atm_virtualbutton *blackButton, int wheelEvtIfPressed, int wheelEvtIfUnpressed) {
+  switch(current_cluster) {
+    case cluster.CLUSTER_RED:
+      trigger_vbutton_response(pressed, redButton);
+      break;
+    case cluster.CLUSTER_BLACK:
+      trigger_vbutton_response(pressed, blackButton);
+      break;
+    case cluster.CLUSTER_BROWN:
+      wheel.trigger(pressed ? wheelEvtIfPressed : wheelEvtIfUnpressed);
+      break;
+  }
 }
 
 void cmp_callback(int idx, int new_state, int pressed ) {
   int current_cluster = cluster.state();
   switch(idx) {
     case GREEN:
-      if(current_cluster == cluster.CLUSTER_RED) {
-        trigger_vbutton_response(pressed, &_toggle);
-      } else if (current_cluster == cluster.CLUSTER_BLACK) {
-        trigger_vbutton_response(pressed, &src_right);
-      } else if (current_cluster == cluster.CLUSTER_BROWN) {
-        if(pressed) wheel.trigger(wheel.EVT_AH);
-        else wheel.trigger(wheel.EVT_AL);
-      }
+      handleSpecificCluster(pressed, current_cluster, &_toggle, &src_right, wheel.EVT_AH, wheel.EVT_AL);
       break;
     case BLUE:
-      if(current_cluster == cluster.CLUSTER_RED) {
-        trigger_vbutton_response(pressed, &volume_up);
-      } else if (current_cluster == cluster.CLUSTER_BLACK) {
-        trigger_vbutton_response(pressed, &volume_mute);
-      } else if (current_cluster == cluster.CLUSTER_BROWN) {
-        if(pressed) wheel.trigger(wheel.EVT_BH);
-        else wheel.trigger(wheel.EVT_BL);
-      }
+      handleSpecificCluster(pressed, current_cluster, &volume_up, &volume_mute, wheel.EVT_BH, wheel.EVT_BL);
       break;
     case YELLOW:
-      if(current_cluster == cluster.CLUSTER_RED) {
-        trigger_vbutton_response(pressed, &volume_down);
-      } else if (current_cluster == cluster.CLUSTER_BLACK) {
-        trigger_vbutton_response(pressed, &src_left);
-      } else if (current_cluster == cluster.CLUSTER_BROWN) {
-        if(pressed) wheel.trigger(wheel.EVT_CH);
-        else wheel.trigger(wheel.EVT_CL);
-      }
+      handleSpecificCluster(pressed, current_cluster, &volume_down, &src_left, wheel.EVT_CH, wheel.EVT_CL);
       break;
   }
 }
 
-void scroll_cb(int a, int b, int c){ 
-  switch(c) {
-    case 0:
-      hu.setState(HU_UP);
-      break;
-    case 1:
-      hu.setState(HU_DOWN);
-      break;
-  }
-  #ifdef DEBUG
-    Serial.print(F("Scroll: "));
-    print_result(a, b, c);
-  #endif
+void scroll_cb(int a, int b, int c){
+  hu.setState(c == 0 ? HU_UP : HU_DOWN);
 }
 
 void butt_event_cb(int idx, int up, int v){
@@ -109,19 +83,13 @@ void butt_event_cb(int idx, int up, int v){
       hu.setState(HU_ATT);
       break;
     case BTN_TOGGLE:
-      hu.setState(HU_DISPLAY);
+      hu.setState(HU_BAND_ESCAPE);
       break;
     case BTN_SRC_LEFT:
-      hu.setState(HU_PREV);
+      hu.setState(HU_SRC_LEFT);
       break;
     case BTN_SRC_RIGHT:
-      hu.setState(HU_NEXT);
-      break;
-    default:
-      #ifdef DEBUG
-        Serial.print(F("Butt: "));
-        print_result(idx, v, up);
-      #endif
+      hu.setState(HU_SRC_RIGHT);
       break;
   }
 }
@@ -166,7 +134,7 @@ void button_init() {
     .onUp(scroll_cb)
     .onDown(scroll_cb);
 
-  timer.begin(10)
+  timer.begin(20)
     .repeat()
     .onTimer(cluster_stepper, cluster_stepper.EVT_STEP)
     .start();

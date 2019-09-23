@@ -13,10 +13,10 @@
 #define BLUE_PIN A2     //Pulldown to GND
 
 #define BROWN_PIN A3     //Enable pin for Scrolling cluster
-#define BLACK_PIN 9     //Enable pin for Red cluster (Vol-, Vol+, Toggle)
-#define RED_PIN 10      //Enable pin for Black cluster (Mute, Src-, Src+)
+#define BLACK_PIN 12     //Enable pin for Red cluster (Vol-, Vol+, Toggle)
+#define RED_PIN 13      //Enable pin for Black cluster (Mute, Src-, Src+)
 
-#define KILLSWITCH_LED_PIN 13
-#define KILLSWITCH_BUTTON_PIN 12
+#define KILLSWITCH_LED_PIN 10
+#define KILLSWITCH_BUTTON_PIN 9
 
-#define HU_TRANSISTOR 2 //Transistor to enable or disable HU control output
+#define HU_TRANSISTOR 11 //Transistor to enable or disable HU control output
