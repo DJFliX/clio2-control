@@ -1,4 +1,3 @@
-#pragma once
 #include "Atm_scrollwheel.hpp"
 
 Atm_scrollwheel &Atm_scrollwheel::begin()

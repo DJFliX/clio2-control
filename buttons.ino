@@ -26,18 +26,8 @@ Atm_ad5171 hu;
 
 long scroll_last[3];
 
-static uint16_t threshold_list[] = { 80 };
+static uint16_t threshold_list[] = { 60 };
 Atm_step cluster_stepper;
-
-#ifdef DEBUG
-void print_result(int idx, int v, int pressed) {
-  Serial.print(idx);
-  Serial.print(F(" "));
-  Serial.print(v);
-  Serial.print(F(" "));
-  Serial.println(pressed);
-}
-#endif
 
 void trigger_vbutton_response(int response, Atm_virtualbutton *button);
 
@@ -79,10 +69,6 @@ void cmp_callback(int idx, int new_state, int pressed ) {
 
 void scroll_cb(int a, int b, int c){
   hu.setState(c == 0 ? HU_UP : HU_DOWN);
-  #ifdef DEBUG
-    Serial.print(F("Scroll: "));
-    print_result(a, b, c);
-  #endif
 }
 
 void butt_event_cb(int idx, int up, int v){
@@ -100,16 +86,10 @@ void butt_event_cb(int idx, int up, int v){
       hu.setState(HU_BAND_ESCAPE);
       break;
     case BTN_SRC_LEFT:
-      hu.setState(HU_PREV);
+      hu.setState(HU_SRC_LEFT);
       break;
     case BTN_SRC_RIGHT:
-      hu.setState(HU_NEXT);
-      break;
-    default:
-      #ifdef DEBUG
-        Serial.print(F("Butt: "));
-        print_result(idx, v, up);
-      #endif
+      hu.setState(HU_SRC_RIGHT);
       break;
   }
 }
@@ -148,7 +128,7 @@ void button_init() {
   src_right.begin()
     .onPress(butt_event_cb, BTN_SRC_RIGHT);
 
-  hu.begin().trace(Serial);
+  hu.begin();
 
   wheel.begin()
     .onUp(scroll_cb)

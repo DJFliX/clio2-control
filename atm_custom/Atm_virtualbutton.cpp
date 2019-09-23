@@ -1,4 +1,3 @@
-#pragma once
 #include "Atm_virtualbutton.hpp"
 
 Atm_virtualbutton &Atm_virtualbutton::begin()

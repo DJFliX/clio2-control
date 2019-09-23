@@ -1,25 +1,24 @@
 #pragma once
 
 #include <Automaton.h>
+#include <Wire.h>
 
-#define HU_ATT 1
-#define HU_VOL_UP 3
-#define HU_VOL_DOWN 5
+#define HU_ATT 4
+#define HU_VOL_UP 11
+#define HU_VOL_DOWN 16
 
-#define HU_DISPLAY 7
+#define HU_SRC_LEFT 1
+#define HU_SRC_RIGHT 23
 
-#define HU_PREV 9
-#define HU_NEXT 11
+#define HU_DOWN 5
+#define HU_UP 6
 
-#define HU_DOWN 13
-#define HU_UP 15
-
-#define HU_BAND_ESCAPE 17
+#define HU_BAND_ESCAPE 2
 
 #define HU_NOOP 64
 
 #define HU_DURATION_MS 60
-#define HU_LONG_DURATION_MS 2000
+#define HU_LONG_DURATION_MS 800
 /*
  * 0 = 94
  * 1 = 940

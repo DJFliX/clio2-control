@@ -1,4 +1,3 @@
-#pragma once
 #include "Atm_buttoncluster.hpp"
 
 Atm_buttoncluster &Atm_buttoncluster::begin()

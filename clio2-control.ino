@@ -1,12 +1,11 @@
-//#define DEBUG //Output debugging info to Serial
-#include <Wire.h>
+#define DEBUG //Output debugging info to Serial
 #include <Automaton.h>
 
 void setup() {
+#ifdef DEBUG
   Serial.begin(115200);
-  Wire.begin();
+#endif
   button_init();
-  //analogReadResolution(8);
 }
 
 void loop() {

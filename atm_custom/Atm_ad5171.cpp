@@ -1,4 +1,3 @@
-#pragma once
 #include "Atm_ad5171.hpp"
 
 Atm_ad5171 &Atm_ad5171::begin()
@@ -13,6 +12,7 @@ Atm_ad5171 &Atm_ad5171::begin()
 
     // clang-format on
     Machine::begin(state_table, ELSE);
+    Wire.begin();
     pinMode(HU_TRANSISTOR, OUTPUT);
     digitalWrite(HU_TRANSISTOR, LOW);
 
@@ -42,6 +42,7 @@ void Atm_ad5171::action(int id)
     {
         case ENT_IDLE:
             desired_op = HU_NOOP;
+            timer_release.set(HU_DURATION_MS);
             setWiper();
             break;
         case ENT_BUSY:
@@ -62,7 +63,6 @@ Atm_ad5171 &Atm_ad5171::setWiper()
   byte _tmp_op = 64 - current_op;
   if(current_op == HU_NOOP) {
     digitalWrite(HU_TRANSISTOR, LOW);
-    timer_release.set(HU_DURATION_MS);
     _tmp_op = 64;
   }
 
@@ -75,7 +75,7 @@ Atm_ad5171 &Atm_ad5171::setWiper()
     timer_release.set(HU_LONG_DURATION_MS);
   }
   if(current_op != HU_NOOP) {
-      digitalWrite(HU_TRANSISTOR, HIGH);
+    digitalWrite(HU_TRANSISTOR, HIGH);
   }
 }
 
